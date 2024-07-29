@@ -1,0 +1,1 @@
+Prepared examples that can be run from main game
