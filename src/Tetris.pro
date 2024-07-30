@@ -21,16 +21,21 @@ CONFIG += c++17
 OBJECTS_DIR = ./obj
 
 SOURCES += \
+    block.cpp \
     main.cpp \
     mainwindow.cpp \
+    menu.cpp \
     scene.cpp
 
 HEADERS += \
+    block.h \
     mainwindow.h \
+    menu.h \
     scene.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    menu.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
