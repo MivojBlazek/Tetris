@@ -24,7 +24,7 @@
    <item>
     <widget class="QPushButton" name="StopButton">
      <property name="text">
-      <string>Pause game</string>
+      <string>Debug button</string>
      </property>
     </widget>
    </item>
