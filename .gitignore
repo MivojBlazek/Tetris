@@ -32,8 +32,9 @@ qrc_*.cpp
 Thumbs.db
 *.res
 *.rc
-/.qmake.cache
-/.qmake.stash
+*/.qmake.cache
+*/.qmake.stash
+*/moc_*
 
 # qtcreator generated files
 *.pro.user*
@@ -70,4 +71,5 @@ Thumbs.db
 # --------
 *.dll
 *.exe
+Tetris
 
