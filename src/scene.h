@@ -1,4 +1,4 @@
-#ifndef SCENE_H
+﻿#ifndef SCENE_H
 #define SCENE_H
 
 #define DOWN 1
@@ -6,7 +6,7 @@
 #define RIGHT 3
 #define FALLING_SPEED 1000
 
-#include "block.h"
+#include "shape.h"
 
 #include <QGraphicsScene>
 #include <QList>
@@ -25,15 +25,21 @@ protected:
 
 private:
     void timeout();
+    Shape::ShapeType nextType();
+    void checkFullRows();
+    void clearRow(QList<Block *> blocks);
+    void shiftRowsDown(qreal deletedRowPosition);
 
     QTimer *mTimer;
-    Block *mBlock;
+    Shape *mShape;
     bool isDropping;
 
     bool isCollision(int direction = DOWN);
     void smallMoveToCollisionDetection(int direction, qreal step);
 
     QList<Block *> blocks;
+    QList<QGraphicsLineItem *> borders;
+    QList<QGraphicsLineItem *> rows;
 };
 
 #endif // SCENE_H
