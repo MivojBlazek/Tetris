@@ -25,13 +25,15 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     menu.cpp \
-    scene.cpp
+    scene.cpp \
+    shape.cpp
 
 HEADERS += \
     block.h \
     mainwindow.h \
     menu.h \
-    scene.h
+    scene.h \
+    shape.h
 
 FORMS += \
     mainwindow.ui \

@@ -12,9 +12,7 @@ class Block : public QGraphicsRectItem
 public:
     explicit Block(QGraphicsItem *parent = nullptr);
 
-    int moveDown(qreal step = 40.0);
-    void moveLeft(qreal step = 40.0);
-    void moveRight(qreal step = 40.0);
+    void moveDown();
     void changeColor(QColor color);
 
 protected:

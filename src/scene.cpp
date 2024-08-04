@@ -1,7 +1,8 @@
 #include "scene.h"
-#include "block.h"
+#include "shape.h"
 
 #include <QDebug>
+#include <QRandomGenerator>
 #include <QTimer>
 #include <QKeyEvent>
 
@@ -11,12 +12,25 @@ Scene::Scene(QObject *parent)
 {
     mTimer = new QTimer(this);
     connect(mTimer, &QTimer::timeout, this, &Scene::timeout);
+
+    // Rows for detection full rows
+    for (int positionFromTop = 0; positionFromTop < 800; positionFromTop += 40)
+    {
+        rows.append(new QGraphicsLineItem(0, positionFromTop + 20, 400, positionFromTop + 20));
+    }
+
+    // Borders of graphics view
+    borders.append(new QGraphicsLineItem(0, 0, 0, 800));
+    borders.append(new QGraphicsLineItem(0, 0, 400, 0));
+    borders.append(new QGraphicsLineItem(0, 800, 400, 800));
+    borders.append(new QGraphicsLineItem(400, 0, 400, 800));
 }
 
 void Scene::start()
 {
-    mBlock = new Block();
-    this->addItem(mBlock);
+    checkFullRows();
+    mShape = new Shape(nextType());
+    this->addItem(mShape);
 
     mTimer->start(FALLING_SPEED);
     isDropping = true;
@@ -27,7 +41,10 @@ void Scene::start()
 void Scene::stop()
 {
     mTimer->stop();
-    blocks.append(mBlock);
+    for (Block *block : mShape->getBlocks())
+    {
+        blocks.append(block);
+    }
     isDropping = false;
 }
 
@@ -35,30 +52,27 @@ void Scene::timeout()
 {
     if (!isCollision(DOWN))
     {
-        if (mBlock->moveDown())
-        {
-            // save to blocks and send next block
-            blocks.append(mBlock);
-
-            mBlock = new Block();
-            this->addItem(mBlock);
-        }
+        mShape->moveDown();
     }
     else
     {
-        // save to blocks and send next block
-        blocks.append(mBlock);
-
-        // if we lost game
-        if (mBlock->scenePos().y() <= 0.0)
+        // Save to blocks and send next shape
+        for (Block *block : mShape->getBlocks())
         {
-            mBlock->changeColor(Qt::red);
+            blocks.append(block);
+        }
+
+        // If we lost game
+        if (mShape->scenePos().y() <= 0.0)
+        {
+            mShape->changeColor(Qt::red);
             this->stop();
             return;
         }
 
-        mBlock = new Block();
-        this->addItem(mBlock);
+        checkFullRows();
+        mShape = new Shape(nextType());
+        this->addItem(mShape);
     }
 }
 
@@ -70,21 +84,21 @@ void Scene::keyPressEvent(QKeyEvent *event)
         {
             if (!isCollision(DOWN))
             {
-                mBlock->moveDown();
+                mShape->moveDown();
             }
         }
         else if (event->key() == Qt::Key_Left)
         {
             if (!isCollision(LEFT))
             {
-                mBlock->moveLeft();
+                mShape->moveLeft();
             }
         }
         else if (event->key() == Qt::Key_Right)
         {
             if (!isCollision(RIGHT))
             {
-                mBlock->moveRight();
+                mShape->moveRight();
             }
         }
         else
@@ -97,14 +111,30 @@ void Scene::keyPressEvent(QKeyEvent *event)
 bool Scene::isCollision(int direction)
 {
     smallMoveToCollisionDetection(direction, 5.0);
-    for (Block *block : blocks)
+
+    // Check collisions with borders
+    for (auto border : borders)
     {
-        if (mBlock->collidesWithItem(block) || (direction == DOWN && mBlock->scenePos().y() > 760.0))
+        if (mShape->collidesWithItem(border))
         {
             smallMoveToCollisionDetection(direction, -5.0);
             return true;
         }
     }
+
+    // Check collisions with other blocks
+    for (Block *block : mShape->getBlocks())
+    {
+        for (Block *otherBlock : blocks)
+        {
+            if (block->collidesWithItem(otherBlock))
+            {
+                smallMoveToCollisionDetection(direction, -5.0);
+                return true;
+            }
+        }
+    }
+
     smallMoveToCollisionDetection(direction, -5.0);
     return false;
 }
@@ -114,13 +144,68 @@ void Scene::smallMoveToCollisionDetection(int direction, qreal step)
     switch (direction)
     {
         case DOWN:
-            mBlock->moveDown(step);
+            mShape->moveDown(step);
             break;
         case LEFT:
-            mBlock->moveLeft(step);
+            mShape->moveLeft(step);
             break;
         case RIGHT:
-            mBlock->moveRight(step);
+            mShape->moveRight(step);
             break;
+    }
+}
+
+Shape::ShapeType Scene::nextType()
+{
+    int randomInt = QRandomGenerator::global()->bounded(0, 7);
+    return static_cast<Shape::ShapeType>(randomInt);
+}
+
+void Scene::checkFullRows()
+{
+    QList<Block *> blocksToRemove;
+    int blocksInRow;
+    for (auto row : rows)
+    {
+        blocksToRemove.clear();
+        blocksInRow = 0;
+
+        for (Block *block : blocks)
+        {
+            if (row->collidesWithItem(block))
+            {
+                // If block collides with selected row
+                blocksToRemove.append(block);
+                blocksInRow++;
+            }
+        }
+        if (blocksInRow == 10)
+        {
+            // Clear this row
+            clearRow(blocksToRemove);
+            shiftRowsDown(row->line().y1());
+        }
+    }
+}
+
+void Scene::clearRow(QList<Block *> blocksToDelete)
+{
+    for (Block *block : blocksToDelete)
+    {
+        blocks.removeOne(block);
+        this->removeItem(block);
+        delete block;
+    }
+}
+
+void Scene::shiftRowsDown(qreal deletedRowPosition)
+{
+    for (Block *block : blocks)
+    {
+        // Shift all blocks above deleted row
+        if (block->scenePos().y() < deletedRowPosition - 20.0)
+        {
+            block->moveDown();
+        }
     }
 }

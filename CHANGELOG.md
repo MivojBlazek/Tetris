@@ -21,3 +21,11 @@ All notable changes to this project will be documented in this file.
 * User can speed up game via down arrow button on his keyboard
 * If any block reaches top of the tower, it will change color to red and pause game
 * Pause button (now Debug button) can only stop block in the air and pause game
+
+## 04.08.2024
+
+* Added shapes that contains blocks
+* All default Tetris shapes supported
+* Shapes cannot exceeded borders or go through others
+* Shapes are chosen randomly
+* After filling entire row, it is deleted and blocks above fall down by 1 block position
