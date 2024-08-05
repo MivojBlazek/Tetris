@@ -25,33 +25,9 @@ void Block::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     painter->fillRect(boundingRect(), fillColor);
 }
 
-int Block::moveDown(qreal step)
+void Block::moveDown()
 {
-    if (scenePos().y() < 760.0)
-    {
-        setPos(pos() + QPointF(0, step));
-    }
-    else
-    {
-        return 1;
-    }
-    return 0;
-}
-
-void Block::moveLeft(qreal step)
-{
-    if (scenePos().x() + 200 > 0.0 && scenePos().y() < 760.0)
-    {
-        setPos(pos() + QPointF(-step, 0));
-    }
-}
-
-void Block::moveRight(qreal step)
-{
-    if (scenePos().x() + 200 < 360.0 && scenePos().y() < 760.0)
-    {
-        setPos(pos() + QPointF(step, 0));
-    }
+    setPos(pos() + QPointF(0, 40));
 }
 
 void Block::changeColor(QColor color)

@@ -8,7 +8,6 @@ Menu::Menu(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->StartButton, &QPushButton::clicked, this, &Menu::onStartButtonClicked);
-    connect(ui->StopButton, &QPushButton::clicked, this, &Menu::onStopButtonClicked);
 }
 
 Menu::~Menu()
@@ -19,9 +18,4 @@ Menu::~Menu()
 void Menu::onStartButtonClicked()
 {
     emit start();
-}
-
-void Menu::onStopButtonClicked()
-{
-    emit stop();
 }
