@@ -1,6 +1,9 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include "shape.h"
+
+#include <QGraphicsScene>
 #include <QWidget>
 
 namespace Ui {
@@ -18,8 +21,13 @@ public:
 private slots:
     void onStartButtonClicked();
 
+public slots:
+    void setNextShape(Shape *shape);
+
 private:
     Ui::Menu *ui;
+
+    QGraphicsScene *previewScene;
 
 signals:
     void start();
