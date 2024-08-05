@@ -20,10 +20,10 @@ Scene::Scene(QObject *parent)
     }
 
     // Borders of graphics view
-    borders.append(new QGraphicsLineItem(0, 0, 0, 800));
-    borders.append(new QGraphicsLineItem(0, 0, 400, 0));
-    borders.append(new QGraphicsLineItem(0, 800, 400, 800));
-    borders.append(new QGraphicsLineItem(400, 0, 400, 800));
+    borders.append(new QGraphicsRectItem(0, 0, 0 - SIZE_OUT_OF_MAP, 800));        // Left
+    borders.append(new QGraphicsRectItem(0, 0, 400, 0 - SIZE_OUT_OF_MAP));        // Up
+    borders.append(new QGraphicsRectItem(0, 800, 400 + SIZE_OUT_OF_MAP, 800));    // Down
+    borders.append(new QGraphicsRectItem(400, 0, 400, 800 + SIZE_OUT_OF_MAP));    // Right
 }
 
 void Scene::start()
@@ -80,6 +80,13 @@ void Scene::keyPressEvent(QKeyEvent *event)
 {
     if (isDropping)
     {
+        // Variables for rotations
+        int numberOfBorderMoves = 0;
+        int numberOfBlockMoves = 0;
+        CollisionDirection directionBorder[3];
+        directionBorder[numberOfBorderMoves] = NONE;
+        CollisionDirection directionBlock = NONE;
+
         if (event->key() == Qt::Key_Down)
         {
             if (!isCollision(DOWN))
@@ -101,9 +108,130 @@ void Scene::keyPressEvent(QKeyEvent *event)
                 mShape->moveRight();
             }
         }
+        else if (event->key() == Qt::Key_Up)
+        {
+            mShape->rotateBackwards();
+            checkCollisions(directionBorder, &numberOfBorderMoves, &directionBlock, &numberOfBlockMoves);
+
+            // If we are stuck after rotation, put all moves back
+            putRotationBack(directionBorder, numberOfBorderMoves, directionBlock, numberOfBlockMoves, false);
+        }
+        else if (event->key() == Qt::Key_Z)
+        {
+            mShape->rotate();
+            checkCollisions(directionBorder, &numberOfBorderMoves, &directionBlock, &numberOfBlockMoves);
+
+            // If we are stuck after rotation, put all moves back
+            putRotationBack(directionBorder, numberOfBorderMoves, directionBlock, numberOfBlockMoves);
+        }
         else
         {
             QGraphicsScene::keyPressEvent(event);
+        }
+    }
+}
+
+void Scene::checkCollisions(CollisionDirection directionBorder[], int *numberOfBorderMoves, CollisionDirection *directionBlock, int *numberOfBlockMoves)
+{
+    // Are there collisions with border? Max 2 if shape I is there
+    while ((directionBorder[*numberOfBorderMoves] = isAlreadyBorderCollision()) != NONE)
+    {
+        switch (directionBorder[*numberOfBorderMoves])
+        {
+            case DOWN:
+                mShape->moveUp();
+                break;
+            case LEFT:
+                mShape->moveRight();
+                break;
+            case RIGHT:
+                mShape->moveLeft();
+                break;
+            case UP:
+                mShape->moveDown();
+                break;
+            default:
+                break;
+        }
+        (*numberOfBorderMoves)++;
+    }
+
+    // Are there collisions with block? Max 2 if shape I is there
+    *directionBlock = isAlreadyBlockCollision();
+    do
+    {
+        (*numberOfBlockMoves)++;
+        switch (*directionBlock)
+        {
+            case DOWN:
+                mShape->moveUp();
+                break;
+            case LEFT:
+                mShape->moveRight();
+                break;
+            case RIGHT:
+                mShape->moveLeft();
+                break;
+            default:
+                break;
+        }
+    } while (mShape->getShapeType() == Shape::ShapeType::I && isAlreadyBlockCollision() && *numberOfBlockMoves == 1);
+}
+
+void Scene::putRotationBack(CollisionDirection directionBorder[], int numberOfBorderMoves, CollisionDirection directionBlock, int numberOfBlockMoves, bool backwards)
+{
+    // Are there still collisions
+    if (isAlreadyBorderCollision() || isAlreadyBlockCollision())
+    {
+        // Rotate back
+        if (backwards)
+        {
+            mShape->rotateBackwards();
+        }
+        else
+        {
+            mShape->rotate();
+        }
+
+        // Move back to position before border collisions
+        for (int i = numberOfBorderMoves; i >= 0; i--)
+        {
+            switch (directionBorder[i])
+            {
+                case DOWN:
+                    mShape->moveDown();
+                    break;
+                case LEFT:
+                    mShape->moveLeft();
+                    break;
+                case RIGHT:
+                    mShape->moveRight();
+                    break;
+                case UP:
+                    mShape->moveUp();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Move back to position before block collisions
+        for (int i = numberOfBlockMoves; i > 0; i--)
+        {
+            switch (directionBlock)
+            {
+                case DOWN:
+                    mShape->moveDown();
+                    break;
+                case LEFT:
+                    mShape->moveLeft();
+                    break;
+                case RIGHT:
+                    mShape->moveRight();
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -115,10 +243,13 @@ bool Scene::isCollision(int direction)
     // Check collisions with borders
     for (auto border : borders)
     {
-        if (mShape->collidesWithItem(border))
+        for (Block *block : mShape->getBlocks())
         {
-            smallMoveToCollisionDetection(direction, -5.0);
-            return true;
+            if (block->collidesWithItem(border))
+            {
+                smallMoveToCollisionDetection(direction, -5.0);
+                return true;
+            }
         }
     }
 
@@ -152,7 +283,66 @@ void Scene::smallMoveToCollisionDetection(int direction, qreal step)
         case RIGHT:
             mShape->moveRight(step);
             break;
+        default:
+            break;
     }
+}
+
+Scene::CollisionDirection Scene::isAlreadyBorderCollision()
+{
+    // Check collisions with borders
+    for (auto border : borders)
+    {
+        for (Block *block : mShape->getBlocks())
+        {
+            if (block->collidesWithItem(border))
+            {
+                if (border == borders[0]) return LEFT;
+                if (border == borders[1]) return UP;
+                if (border == borders[2]) return DOWN;
+                if (border == borders[3]) return RIGHT;
+            }
+        }
+    }
+    return NONE;
+}
+
+Scene::CollisionDirection Scene::isAlreadyBlockCollision()
+{
+    // Check collisions with other blocks
+    for (Block *block : mShape->getBlocks())
+    {
+        for (Block *otherBlock : blocks)
+        {
+            if (block->collidesWithItem(otherBlock))
+            {
+                qreal dx = mShape->getBlocks()[0]->scenePos().x() - otherBlock->scenePos().x();
+                qreal dy = mShape->getBlocks()[0]->scenePos().y() - otherBlock->scenePos().y();
+
+                // If difference on y-axis is greater, collision is under falling piece
+                if (qAbs(dx) < qAbs(dy))
+                {
+                    if (dy < 0)
+                    {
+                        return DOWN;
+                    }
+                }
+                else
+                {
+                    // Determine which side collision is
+                    if (dx > 0)
+                    {
+                        return LEFT;
+                    }
+                    else
+                    {
+                        return RIGHT;
+                    }
+                }
+            }
+        }
+    }
+    return NONE;
 }
 
 Shape::ShapeType Scene::nextType()
@@ -179,6 +369,7 @@ void Scene::checkFullRows()
                 blocksInRow++;
             }
         }
+        // After 10 collisions (10 blocks in a row)
         if (blocksInRow == 10)
         {
             // Clear this row

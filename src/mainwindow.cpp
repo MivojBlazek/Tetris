@@ -20,10 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
         scene->start();
         view->setFocus();
     });
-    connect(ui->Right_menu, &Menu::stop, scene, [scene, view]() {
-        scene->stop();
-        view->setFocus();
-    });
 }
 
 MainWindow::~MainWindow()

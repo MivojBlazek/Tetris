@@ -29,3 +29,11 @@ All notable changes to this project will be documented in this file.
 * Shapes cannot exceeded borders or go through others
 * Shapes are chosen randomly
 * After filling entire row, it is deleted and blocks above fall down by 1 block position
+
+## 05.08.2024
+
+* Removed Debug button as it does nothing interesting
+* Blocks can be rotated with up arrow to the right and Z button to the left
+* Blocks cannot be rotated if there is not enough space for them
+* If block is rotated near obstacle like other block or border of playing field, block is moved to not to be stuck
+ 

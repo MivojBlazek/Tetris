@@ -17,14 +17,12 @@ public:
 
 private slots:
     void onStartButtonClicked();
-    void onStopButtonClicked();
 
 private:
     Ui::Menu *ui;
 
 signals:
     void start();
-    void stop();
 };
 
 #endif // MENU_H

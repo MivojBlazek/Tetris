@@ -21,13 +21,6 @@
      </property>
     </widget>
    </item>
-   <item>
-    <widget class="QPushButton" name="StopButton">
-     <property name="text">
-      <string>Debug button</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources/>
