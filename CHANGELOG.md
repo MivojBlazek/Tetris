@@ -36,4 +36,4 @@ All notable changes to this project will be documented in this file.
 * Blocks can be rotated with up arrow to the right and Z button to the left
 * Blocks cannot be rotated if there is not enough space for them
 * If block is rotated near obstacle like other block or border of playing field, block is moved to not to be stuck
- 
+* Added next field where is displayed next piece that will be falling

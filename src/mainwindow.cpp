@@ -17,9 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     view->setFocusPolicy(Qt::StrongFocus);
 
     connect(ui->Right_menu, &Menu::start, scene, [scene, view]() {
-        scene->start();
+        scene->startButtonPressed();
         view->setFocus();
     });
+
+    connect(scene, &Scene::nextShapeGenerated, ui->Right_menu, &Menu::setNextShape);
 }
 
 MainWindow::~MainWindow()

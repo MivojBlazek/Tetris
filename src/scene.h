@@ -16,8 +16,12 @@ public:
     explicit Scene(QObject *parent = nullptr);
     enum CollisionDirection { NONE, DOWN, LEFT, RIGHT, UP };
 
+    void startButtonPressed();
     void start();
     void stop();
+
+signals:
+    void nextShapeGenerated(Shape *nextShape);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
@@ -34,6 +38,7 @@ private:
 
     QTimer *mTimer;
     Shape *mShape;
+    Shape *nextShape;
     bool isDropping;
 
     bool isCollision(int direction = DOWN);

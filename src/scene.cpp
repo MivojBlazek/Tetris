@@ -5,6 +5,7 @@
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QKeyEvent>
+#include <memory>
 
 Scene::Scene(QObject *parent)
     : QGraphicsScene{parent},
@@ -26,10 +27,22 @@ Scene::Scene(QObject *parent)
     borders.append(new QGraphicsRectItem(400, 0, 400, 800 + SIZE_OUT_OF_MAP));    // Right
 }
 
+void Scene::startButtonPressed()
+{
+    nextShape = new Shape(nextType());
+    emit nextShapeGenerated(nextShape);
+    start();
+}
+
 void Scene::start()
 {
     checkFullRows();
-    mShape = new Shape(nextType());
+    mShape = new Shape(nextShape->getShapeType());
+    delete nextShape;
+
+    nextShape = new Shape(nextType());
+    emit nextShapeGenerated(nextShape);
+
     this->addItem(mShape);
 
     mTimer->start(FALLING_SPEED);
@@ -71,7 +84,12 @@ void Scene::timeout()
         }
 
         checkFullRows();
-        mShape = new Shape(nextType());
+        mShape = new Shape(nextShape->getShapeType());
+        delete nextShape;
+
+        nextShape = new Shape(nextType());
+        emit nextShapeGenerated(nextShape);
+
         this->addItem(mShape);
     }
 }
