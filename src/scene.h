@@ -16,8 +16,13 @@ public:
     explicit Scene(QObject *parent = nullptr);
     enum CollisionDirection { NONE, DOWN, LEFT, RIGHT, UP };
 
+    void startButtonPressed();
     void start();
     void stop();
+
+signals:
+    void nextShapeGenerated(Shape *nextShape);
+    void addedToHold(Shape *holdShape);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
@@ -34,7 +39,10 @@ private:
 
     QTimer *mTimer;
     Shape *mShape;
+    Shape *nextShape;
+    Shape *holdShape;
     bool isDropping;
+    bool holdDoneThisRound;
 
     bool isCollision(int direction = DOWN);
     void smallMoveToCollisionDetection(int direction, qreal step);

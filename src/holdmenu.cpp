@@ -1,32 +1,23 @@
-#include "menu.h"
-#include "ui_menu.h"
+#include "holdmenu.h"
+#include "ui_holdmenu.h"
 #include "scene.h"
 
-Menu::Menu(QWidget *parent) :
+HoldMenu::HoldMenu(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Menu),
+    ui(new Ui::HoldMenu),
     previewScene(new QGraphicsScene(this))
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(previewScene);
-
-    connect(ui->StartButton, &QPushButton::clicked, this, &Menu::onStartButtonClicked);
-
-    ui->StartButton->show();
 }
 
-Menu::~Menu()
+HoldMenu::~HoldMenu()
 {
     delete ui;
 }
 
-void Menu::onStartButtonClicked()
-{
-    emit start();
-    ui->StartButton->hide();
-}
 
-void Menu::setNextShape(Shape *shape)
+void HoldMenu::setHold(Shape *shape)
 {
     previewScene->clear();
     shape->setPos(

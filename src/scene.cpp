@@ -5,10 +5,12 @@
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QKeyEvent>
+#include <memory>
 
 Scene::Scene(QObject *parent)
     : QGraphicsScene{parent},
-      isDropping{false}
+      isDropping{false},
+      holdDoneThisRound{false}
 {
     mTimer = new QTimer(this);
     connect(mTimer, &QTimer::timeout, this, &Scene::timeout);
@@ -26,10 +28,24 @@ Scene::Scene(QObject *parent)
     borders.append(new QGraphicsRectItem(400, 0, 400, 800 + SIZE_OUT_OF_MAP));    // Right
 }
 
+void Scene::startButtonPressed()
+{
+    nextShape = new Shape(nextType());
+    holdShape = nullptr;
+    emit nextShapeGenerated(nextShape);
+    start();
+}
+
 void Scene::start()
 {
     checkFullRows();
-    mShape = new Shape(nextType());
+    mShape = new Shape(nextShape->getShapeType());
+    delete nextShape;
+
+    nextShape = new Shape(nextType());
+    emit nextShapeGenerated(nextShape);
+    holdDoneThisRound = false;
+
     this->addItem(mShape);
 
     mTimer->start(FALLING_SPEED);
@@ -71,7 +87,13 @@ void Scene::timeout()
         }
 
         checkFullRows();
-        mShape = new Shape(nextType());
+        mShape = new Shape(nextShape->getShapeType());
+        delete nextShape;
+
+        nextShape = new Shape(nextType());
+        emit nextShapeGenerated(nextShape);
+        holdDoneThisRound = false;
+
         this->addItem(mShape);
     }
 }
@@ -123,6 +145,47 @@ void Scene::keyPressEvent(QKeyEvent *event)
 
             // If we are stuck after rotation, put all moves back
             putRotationBack(directionBorder, numberOfBorderMoves, directionBlock, numberOfBlockMoves);
+        }
+        else if (event->key() == Qt::Key_C)
+        {
+            // User can use hold anly once per piece drop
+            if (!holdDoneThisRound)
+            {
+                holdDoneThisRound = true;
+
+                Shape *tmpShape = nullptr;
+                if (holdShape != nullptr)
+                {
+                    // Take shape from hold
+                    tmpShape = new Shape(holdShape->getShapeType());
+                    delete holdShape;
+                    holdShape = nullptr;
+                }
+                // Add to hold
+                holdShape = new Shape(mShape->getShapeType());
+                emit addedToHold(holdShape);
+                delete mShape;
+                mShape = nullptr;
+
+                // Change actual shape on saved one from hold
+                if (tmpShape != nullptr)
+                {
+                    mShape = new Shape(tmpShape->getShapeType());
+                    delete tmpShape;
+
+                    this->addItem(mShape);
+                }
+                else
+                {
+                    mShape = new Shape(nextShape->getShapeType());
+                    delete nextShape;
+
+                    nextShape = new Shape(nextType());
+                    emit nextShapeGenerated(nextShape);
+
+                    this->addItem(mShape);
+                }
+            }
         }
         else
         {
