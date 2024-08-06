@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "scene.h"
 #include "menu.h"
+#include "holdmenu.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    resize(750, 750);
+    resize(850, 850);
     Scene *scene = initScene();
 
     QGraphicsView *view = ui->graphicsView;
@@ -22,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(scene, &Scene::nextShapeGenerated, ui->Right_menu, &Menu::setNextShape);
+    connect(scene, &Scene::addedToHold, ui->Left_menu, &HoldMenu::setHold);
 }
 
 MainWindow::~MainWindow()

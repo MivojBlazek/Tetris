@@ -37,3 +37,8 @@ All notable changes to this project will be documented in this file.
 * Blocks cannot be rotated if there is not enough space for them
 * If block is rotated near obstacle like other block or border of playing field, block is moved to not to be stuck
 * Added next field where is displayed next piece that will be falling
+
+## 06.08.2024
+
+* Added hold and is bind on C key on users keyboard
+* Hold can be used only once per piece drop and allows user to switch between holding and falling piece

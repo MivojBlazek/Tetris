@@ -22,6 +22,7 @@ public:
 
 signals:
     void nextShapeGenerated(Shape *nextShape);
+    void addedToHold(Shape *holdShape);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
@@ -39,7 +40,9 @@ private:
     QTimer *mTimer;
     Shape *mShape;
     Shape *nextShape;
+    Shape *holdShape;
     bool isDropping;
+    bool holdDoneThisRound;
 
     bool isCollision(int direction = DOWN);
     void smallMoveToCollisionDetection(int direction, qreal step);

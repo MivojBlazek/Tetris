@@ -22,6 +22,7 @@ OBJECTS_DIR = ./obj
 
 SOURCES += \
     block.cpp \
+    holdmenu.cpp \
     main.cpp \
     mainwindow.cpp \
     menu.cpp \
@@ -30,12 +31,14 @@ SOURCES += \
 
 HEADERS += \
     block.h \
+    holdmenu.h \
     mainwindow.h \
     menu.h \
     scene.h \
     shape.h
 
 FORMS += \
+    holdmenu.ui \
     mainwindow.ui \
     menu.ui
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>896</width>
-    <height>821</height>
+    <width>743</width>
+    <height>886</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,6 +42,9 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="HoldMenu" name="Left_menu" native="true"/>
       </item>
       <item>
        <widget class="QGraphicsView" name="graphicsView">
@@ -106,7 +109,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>896</width>
+     <width>743</width>
      <height>22</height>
     </rect>
    </property>
@@ -118,6 +121,12 @@
    <class>Menu</class>
    <extends>QWidget</extends>
    <header>menu.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>HoldMenu</class>
+   <extends>QWidget</extends>
+   <header>holdmenu.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
