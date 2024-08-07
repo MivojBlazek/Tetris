@@ -26,6 +26,8 @@ Scene::Scene(QObject *parent)
     borders.append(new QGraphicsRectItem(0, 0, 400, 0 - SIZE_OUT_OF_MAP));        // Up
     borders.append(new QGraphicsRectItem(0, 800, 400 + SIZE_OUT_OF_MAP, 800));    // Down
     borders.append(new QGraphicsRectItem(400, 0, 400, 800 + SIZE_OUT_OF_MAP));    // Right
+
+    setupGrid();
 }
 
 void Scene::startButtonPressed()
@@ -34,6 +36,23 @@ void Scene::startButtonPressed()
     holdShape = nullptr;
     emit nextShapeGenerated(nextShape);
     start();
+}
+
+void Scene::setupGrid()
+{
+    for (int positionFromTop = 40; positionFromTop < 800; positionFromTop += 40)
+    {
+        grid.append(new QGraphicsLineItem(0, positionFromTop, 400, positionFromTop));
+    }
+    for (int positionFromLeft = 40; positionFromLeft < 400; positionFromLeft += 40)
+    {
+        grid.append(new QGraphicsLineItem(positionFromLeft, 0, positionFromLeft, 800));
+    }
+    for (auto line : grid)
+    {
+        line->setPen(QPen(QColor(127, 127, 127, 100)));
+        this->addItem(line);
+    }
 }
 
 void Scene::start()
@@ -64,6 +83,11 @@ void Scene::stop()
     isDropping = false;
 }
 
+void Scene::setSpeed(int speed)
+{
+    mTimer->start(speed);
+}
+
 void Scene::timeout()
 {
     if (!isCollision(DOWN))
@@ -81,7 +105,7 @@ void Scene::timeout()
         // If we lost game
         if (mShape->scenePos().y() <= 0.0)
         {
-            mShape->changeColor(Qt::red);
+            mShape->changeColor(Qt::gray);
             this->stop();
             return;
         }
@@ -113,6 +137,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         {
             if (!isCollision(DOWN))
             {
+                addSomeScore(SOFT_DROP);
                 mShape->moveDown();
             }
         }
@@ -416,6 +441,8 @@ Shape::ShapeType Scene::nextType()
 
 void Scene::checkFullRows()
 {
+    int numberOfRemovedRows = 0;
+
     QList<Block *> blocksToRemove;
     int blocksInRow;
     for (auto row : rows)
@@ -438,7 +465,28 @@ void Scene::checkFullRows()
             // Clear this row
             clearRow(blocksToRemove);
             shiftRowsDown(row->line().y1());
+
+            numberOfRemovedRows++;
         }
+    }
+
+    // How many rows were removed
+    switch (numberOfRemovedRows)
+    {
+        case 1:
+            addSomeScore(ONE_ROW);
+            break;
+        case 2:
+            addSomeScore(TWO_ROWS);
+            break;
+        case 3:
+            addSomeScore(THREE_ROWS);
+            break;
+        case 4:
+            addSomeScore(FOUR_ROWS);
+            break;
+        default:
+            break;
     }
 }
 
@@ -461,5 +509,29 @@ void Scene::shiftRowsDown(qreal deletedRowPosition)
         {
             block->moveDown();
         }
+    }
+}
+
+void Scene::addSomeScore(ScoreType scoreToAdd)
+{
+    switch (scoreToAdd)
+    {
+        case SOFT_DROP:
+            emit addScore("1");
+            break;
+        case ONE_ROW:
+            emit addScore("100");
+            break;
+        case TWO_ROWS:
+            emit addScore("300");
+            break;
+        case THREE_ROWS:
+            emit addScore("500");
+            break;
+        case FOUR_ROWS:
+            emit addScore("800");
+            break;
+        default:
+            break;
     }
 }

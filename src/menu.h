@@ -22,7 +22,10 @@ private slots:
     void onStartButtonClicked();
 
 public slots:
+    void setFocusToStartButton();
     void setNextShape(Shape *shape);
+    void setScore(QString score);
+    void setHighscore(QString highscore);
 
 private:
     Ui::Menu *ui;

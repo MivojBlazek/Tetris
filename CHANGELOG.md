@@ -42,3 +42,12 @@ All notable changes to this project will be documented in this file.
 
 * Added hold and is bind on C key on users keyboard
 * Hold can be used only once per piece drop and allows user to switch between holding and falling piece
+
+## 07.08.2024
+
+* Added different colors to different shapes
+* Added focus on Start button so user can start game just with pressing enter
+* Added grid
+* Added score and highscore that is saved in highscore.json file
+* Score amount that can user get are 1 per soft drop, 100 per removed row, 300 per 2 removed rows at the time and the same for 3 and 4 rows (500 points and 800 points)
+* After reaching specific score limit it speed up game a little bit
