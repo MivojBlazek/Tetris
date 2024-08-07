@@ -15,19 +15,24 @@ class Scene : public QGraphicsScene
 public:
     explicit Scene(QObject *parent = nullptr);
     enum CollisionDirection { NONE, DOWN, LEFT, RIGHT, UP };
+    enum ScoreType { SOFT_DROP, HARD_DROP, ONE_ROW, TWO_ROWS, THREE_ROWS, FOUR_ROWS };
 
     void startButtonPressed();
     void start();
     void stop();
+    void setSpeed(int speed);
 
 signals:
     void nextShapeGenerated(Shape *nextShape);
     void addedToHold(Shape *holdShape);
+    void addScore(QString score);
 
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
 
 private:
+    void setupGrid();
+
     void timeout();
     Shape::ShapeType nextType();
     void checkFullRows();
@@ -49,9 +54,12 @@ private:
     Scene::CollisionDirection isAlreadyBorderCollision();
     Scene::CollisionDirection isAlreadyBlockCollision();
 
+    void addSomeScore(Scene::ScoreType scoreToAdd);
+
     QList<Block *> blocks;
     QList<QGraphicsRectItem *> borders;
     QList<QGraphicsLineItem *> rows;
+    QList<QGraphicsLineItem *> grid;
 };
 
 #endif // SCENE_H

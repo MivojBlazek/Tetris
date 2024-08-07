@@ -22,42 +22,49 @@ Shape::Shape(ShapeType type, QGraphicsItem *parent)
             blocks[1]->setPos(-80, 0);
             blocks[2]->setPos(0, 0);
             blocks[3]->setPos(40, 0);
+            changeColor(Qt::cyan);
             break;
         case O:
             blocks[0]->setPos(0, 0);
             blocks[1]->setPos(-40, 0);
             blocks[2]->setPos(0, 40);
             blocks[3]->setPos(-40, 40);
+            changeColor(Qt::yellow);
             break;
         case T:
             blocks[0]->setPos(-40, 40);
             blocks[1]->setPos(0, 40);
             blocks[2]->setPos(-80, 40);
             blocks[3]->setPos(-40, 0);
+            changeColor(Qt::magenta);
             break;
         case S:
             blocks[0]->setPos(-40, 0);
             blocks[1]->setPos(0, 0);
             blocks[2]->setPos(-80, 40);
             blocks[3]->setPos(-40, 40);
+            changeColor(Qt::green);
             break;
         case Z:
             blocks[0]->setPos(-40, 0);
             blocks[1]->setPos(-80, 0);
             blocks[2]->setPos(-40, 40);
             blocks[3]->setPos(0, 40);
+            changeColor(Qt::red);
             break;
         case J:
             blocks[0]->setPos(-40, 40);
             blocks[1]->setPos(-80, 40);
             blocks[2]->setPos(0, 40);
             blocks[3]->setPos(-80, 0);
+            changeColor(Qt::blue);
             break;
         case L:
             blocks[0]->setPos(-40, 40);
             blocks[1]->setPos(0, 40);
             blocks[2]->setPos(-80, 40);
             blocks[3]->setPos(0, 0);
+            changeColor(QColor(255, 127, 0)); // Orange
             break;
     }
 
