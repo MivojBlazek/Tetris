@@ -15,7 +15,18 @@ Shape::Shape(ShapeType type, QGraphicsItem *parent)
     blocks.append(new Block(this));
 
     // Arrange blocks (blocks[0] will be pivot during rotations)
-    switch (type)
+    arrangeBlocks();
+
+    // Add blocks to the group
+    for (Block *block : blocks)
+    {
+        addToGroup(block);
+    }
+}
+
+void Shape::arrangeBlocks()
+{
+    switch (mType)
     {
         case I:
             blocks[0]->setPos(-40, 0);
@@ -66,12 +77,6 @@ Shape::Shape(ShapeType type, QGraphicsItem *parent)
             blocks[3]->setPos(0, 0);
             changeColor(QColor(255, 127, 0)); // Orange
             break;
-    }
-
-    // Add blocks to the group
-    for (Block *block : blocks)
-    {
-        addToGroup(block);
     }
 }
 

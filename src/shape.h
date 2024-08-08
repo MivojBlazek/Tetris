@@ -26,6 +26,8 @@ public:
     void rotateBackwards();
 
 private:
+    void arrangeBlocks();
+
     QList<Block *> blocks;
     ShapeType mType;
 };
