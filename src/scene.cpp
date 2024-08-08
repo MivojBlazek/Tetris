@@ -10,7 +10,8 @@
 Scene::Scene(QObject *parent)
     : QGraphicsScene{parent},
       isDropping{false},
-      holdDoneThisRound{false}
+      holdDoneThisRound{false},
+      preview{nullptr}
 {
     mTimer = new QTimer(this);
     connect(mTimer, &QTimer::timeout, this, &Scene::timeout);
@@ -58,7 +59,13 @@ void Scene::setupGrid()
 void Scene::start()
 {
     checkFullRows();
+    if (preview && preview != nullptr)
+    {
+        delete preview;
+    }
     mShape = new Shape(nextShape->getShapeType());
+    preview = new Shape(nextShape->getShapeType());
+    updatePreview();
     delete nextShape;
 
     nextShape = new Shape(nextType());
@@ -66,6 +73,7 @@ void Scene::start()
     holdDoneThisRound = false;
 
     this->addItem(mShape);
+    this->addItem(preview);
 
     mTimer->start(FALLING_SPEED);
     isDropping = true;
@@ -111,7 +119,13 @@ void Scene::timeout()
         }
 
         checkFullRows();
+        if (preview && preview != nullptr)
+        {
+            delete preview;
+        }
         mShape = new Shape(nextShape->getShapeType());
+        preview = new Shape(nextShape->getShapeType());
+        updatePreview();
         delete nextShape;
 
         nextShape = new Shape(nextType());
@@ -119,6 +133,7 @@ void Scene::timeout()
         holdDoneThisRound = false;
 
         this->addItem(mShape);
+        this->addItem(preview);
     }
 }
 
@@ -141,11 +156,22 @@ void Scene::keyPressEvent(QKeyEvent *event)
                 mShape->moveDown();
             }
         }
+        else if (event->key() == Qt::Key_Space)
+        {
+            while (!isCollision(DOWN))
+            {
+                addSomeScore(HARD_DROP);
+                mShape->moveDown();
+            }
+            timeout();
+        }
         else if (event->key() == Qt::Key_Left)
         {
             if (!isCollision(LEFT))
             {
                 mShape->moveLeft();
+                preview->moveLeft();
+                updatePreview();
             }
         }
         else if (event->key() == Qt::Key_Right)
@@ -153,11 +179,15 @@ void Scene::keyPressEvent(QKeyEvent *event)
             if (!isCollision(RIGHT))
             {
                 mShape->moveRight();
+                preview->moveRight();
+                updatePreview();
             }
         }
-        else if (event->key() == Qt::Key_Up)
+        else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_X)
         {
             mShape->rotateBackwards();
+            preview->rotateBackwards();
+            updatePreview();
             checkCollisions(directionBorder, &numberOfBorderMoves, &directionBlock, &numberOfBlockMoves);
 
             // If we are stuck after rotation, put all moves back
@@ -166,6 +196,8 @@ void Scene::keyPressEvent(QKeyEvent *event)
         else if (event->key() == Qt::Key_Z)
         {
             mShape->rotate();
+            preview->rotate();
+            updatePreview();
             checkCollisions(directionBorder, &numberOfBorderMoves, &directionBlock, &numberOfBlockMoves);
 
             // If we are stuck after rotation, put all moves back
@@ -191,24 +223,32 @@ void Scene::keyPressEvent(QKeyEvent *event)
                 emit addedToHold(holdShape);
                 delete mShape;
                 mShape = nullptr;
+                delete preview;
+                preview = nullptr;
 
                 // Change actual shape on saved one from hold
                 if (tmpShape != nullptr)
                 {
                     mShape = new Shape(tmpShape->getShapeType());
+                    preview = new Shape(tmpShape->getShapeType());
+                    updatePreview();
                     delete tmpShape;
 
                     this->addItem(mShape);
+                    this->addItem(preview);
                 }
                 else
                 {
                     mShape = new Shape(nextShape->getShapeType());
+                    preview = new Shape(nextShape->getShapeType());
+                    updatePreview();
                     delete nextShape;
 
                     nextShape = new Shape(nextType());
                     emit nextShapeGenerated(nextShape);
 
                     this->addItem(mShape);
+                    this->addItem(preview);
                 }
             }
         }
@@ -216,6 +256,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         {
             QGraphicsScene::keyPressEvent(event);
         }
+        updatePreview();
     }
 }
 
@@ -519,6 +560,9 @@ void Scene::addSomeScore(ScoreType scoreToAdd)
         case SOFT_DROP:
             emit addScore("1");
             break;
+        case HARD_DROP:
+            emit addScore("2");
+            break;
         case ONE_ROW:
             emit addScore("100");
             break;
@@ -534,4 +578,37 @@ void Scene::addSomeScore(ScoreType scoreToAdd)
         default:
             break;
     }
+}
+
+void Scene::updatePreview()
+{
+    preview->setPos(preview->pos().x(), 0.0);
+    preview->changeColor(QColor(127, 127, 127, 40));
+    while (!isPreviewDown())
+    {
+        preview->moveDown();
+    }
+}
+
+bool Scene::isPreviewDown()
+{
+    preview->moveDown(5);
+    for (Block *previewBlock : preview->getBlocks())
+    {
+        if (previewBlock->collidesWithItem(borders[2]))
+        {
+            preview->moveDown(-5);
+            return true;
+        }
+        for (Block *fallenBlock : blocks)
+        {
+            if (previewBlock->collidesWithItem(fallenBlock))
+            {
+                preview->moveDown(-5);
+                return true;
+            }
+        }
+    }
+    preview->moveDown(-5);
+    return false;
 }

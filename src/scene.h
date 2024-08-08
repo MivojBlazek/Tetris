@@ -56,6 +56,10 @@ private:
 
     void addSomeScore(Scene::ScoreType scoreToAdd);
 
+    void updatePreview();
+    Shape *preview;
+    bool isPreviewDown();
+
     QList<Block *> blocks;
     QList<QGraphicsRectItem *> borders;
     QList<QGraphicsLineItem *> rows;
