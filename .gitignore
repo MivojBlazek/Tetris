@@ -74,3 +74,11 @@ highscore.json
 *.exe
 Tetris
 
+# Linux build 
+build/Linux/ui_*
+build/Linux/moc_*
+build/Linux/Tetris
+build/Linux/.qmake*
+build/Linux/Makefile
+build/Linux/obj
+build/Linux/*.o

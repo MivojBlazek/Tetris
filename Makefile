@@ -3,29 +3,25 @@
 #
 # File: Makefile
 #
-# Description: Makefile to compile and run program. It can generate doxygen documentation.
+# Description: Makefile to compile and run program on Linux.
 # 
 # Author: Michal Blažek
 #
 
 PROJECT_NAME=Tetris
 SOURCE_DIR=src/
+BUILD_DIR=build/Linux/
 PROJECT=$(SOURCE_DIR)$(PROJECT_NAME)
-
-DOX_CFG=doxygenConfig
-ZIP_NAME=tetris.zip
+BINARY=$(BUILD_DIR)$(PROJECT_NAME)
 
 compile: 
-	qmake $(PROJECT).pro -o $(SOURCE_DIR)Makefile
-	$(MAKE) -C $(SOURCE_DIR)
+	qmake $(PROJECT).pro -o $(BUILD_DIR)Makefile
+	$(MAKE) -C $(BUILD_DIR)
 
 all: compile run
 
 run:
-	$(PROJECT)
-
-doxygen:
-	doxygen $(DOX_CFG)
+	$(BINARY)
 
 clean:
-	rm -rf $(SOURCE_DIR)obj/*.o $(SOURCE_DIR)Makefile $(PROJECT) $(SOURCE_DIR)moc_* $(SOURCE_DIR)ui_* $(PROJECT).pro.user $(SOURCE_DIR).qmake.stash doc/html doc/latex
+	rm -rf $(BUILD_DIR)obj $(BUILD_DIR)Makefile $(BUILD_DIR)moc_* $(BUILD_DIR).qmake* $(BINARY) $(BUILD_DIR)ui_*

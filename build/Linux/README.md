@@ -1,0 +1,1 @@
+Build of this project compatible with Linux Ubuntu 22.04.4 LTS
