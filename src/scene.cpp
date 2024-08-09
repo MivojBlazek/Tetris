@@ -582,7 +582,7 @@ void Scene::addSomeScore(ScoreType scoreToAdd)
 
 void Scene::updatePreview()
 {
-    preview->setPos(preview->pos().x(), 0.0);
+    preview->setPos(mShape->pos().x(), 0.0);
     preview->changeColor(QColor(127, 127, 127, 40));
     while (!isPreviewDown())
     {
