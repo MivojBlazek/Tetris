@@ -1,6 +1,8 @@
 #ifndef HOLDMENU_H
 #define HOLDMENU_H
 
+#include "config.h"
+
 #include "shape.h"
 
 #include <QGraphicsScene>

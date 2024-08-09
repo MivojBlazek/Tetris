@@ -17,16 +17,16 @@ Scene::Scene(QObject *parent)
     connect(mTimer, &QTimer::timeout, this, &Scene::timeout);
 
     // Rows for detection full rows
-    for (int positionFromTop = 0; positionFromTop < 800; positionFromTop += 40)
+    for (int positionFromTop = 0; positionFromTop < 20 * CELL_SIZE; positionFromTop += CELL_SIZE)
     {
-        rows.append(new QGraphicsLineItem(0, positionFromTop + 20, 400, positionFromTop + 20));
+        rows.append(new QGraphicsLineItem(0, positionFromTop + CELL_SIZE / 2, 10 * CELL_SIZE, positionFromTop + CELL_SIZE / 2));
     }
 
     // Borders of graphics view
-    borders.append(new QGraphicsRectItem(0, 0, 0 - SIZE_OUT_OF_MAP, 800));        // Left
-    borders.append(new QGraphicsRectItem(0, 0, 400, 0 - SIZE_OUT_OF_MAP));        // Up
-    borders.append(new QGraphicsRectItem(0, 800, 400 + SIZE_OUT_OF_MAP, 800));    // Down
-    borders.append(new QGraphicsRectItem(400, 0, 400, 800 + SIZE_OUT_OF_MAP));    // Right
+    borders.append(new QGraphicsRectItem(0, 0, 0 - SIZE_OUT_OF_MAP, 20 * CELL_SIZE));                           // Left
+    borders.append(new QGraphicsRectItem(0, 0, 10 * CELL_SIZE, 0 - SIZE_OUT_OF_MAP));                           // Up
+    borders.append(new QGraphicsRectItem(0, 20 * CELL_SIZE, 10 * CELL_SIZE + SIZE_OUT_OF_MAP, 20 * CELL_SIZE)); // Down
+    borders.append(new QGraphicsRectItem(10 * CELL_SIZE, 0, 10 * CELL_SIZE, 20 * CELL_SIZE + SIZE_OUT_OF_MAP)); // Right
 
     setupGrid();
 }
@@ -41,13 +41,13 @@ void Scene::startButtonPressed()
 
 void Scene::setupGrid()
 {
-    for (int positionFromTop = 40; positionFromTop < 800; positionFromTop += 40)
+    for (int positionFromTop = CELL_SIZE; positionFromTop < 20 * CELL_SIZE; positionFromTop += CELL_SIZE)
     {
-        grid.append(new QGraphicsLineItem(0, positionFromTop, 400, positionFromTop));
+        grid.append(new QGraphicsLineItem(0, positionFromTop, 10 * CELL_SIZE, positionFromTop));
     }
-    for (int positionFromLeft = 40; positionFromLeft < 400; positionFromLeft += 40)
+    for (int positionFromLeft = CELL_SIZE; positionFromLeft < 10 * CELL_SIZE; positionFromLeft += CELL_SIZE)
     {
-        grid.append(new QGraphicsLineItem(positionFromLeft, 0, positionFromLeft, 800));
+        grid.append(new QGraphicsLineItem(positionFromLeft, 0, positionFromLeft, 20 * CELL_SIZE));
     }
     for (auto line : grid)
     {
@@ -546,7 +546,7 @@ void Scene::shiftRowsDown(qreal deletedRowPosition)
     for (Block *block : blocks)
     {
         // Shift all blocks above deleted row
-        if (block->scenePos().y() < deletedRowPosition - 20.0)
+        if (block->scenePos().y() < deletedRowPosition - CELL_SIZE / 2)
         {
             block->moveDown();
         }
