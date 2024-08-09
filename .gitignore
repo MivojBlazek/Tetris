@@ -35,6 +35,7 @@ Thumbs.db
 */.qmake.cache
 */.qmake.stash
 */moc_*
+highscore.json
 
 # qtcreator generated files
 *.pro.user*
@@ -73,3 +74,21 @@ Thumbs.db
 *.exe
 Tetris
 
+# Linux build 
+build/Linux/ui_*
+build/Linux/moc_*
+build/Linux/Tetris
+build/Linux/.qmake*
+build/Linux/Makefile
+build/Linux/obj
+build/Linux/*.o
+
+!build/Windows/release/*
+!build/Windows/release/generic/*
+!build/Windows/release/iconengines/*
+!build/Windows/release/imageformats/*
+!build/Windows/release/networkinformation/*
+!build/Windows/release/platforms/*
+!build/Windows/release/styles/*
+!build/Windows/release/tls/*
+!build/Windows/release/translations/*

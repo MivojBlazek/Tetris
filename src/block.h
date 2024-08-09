@@ -1,7 +1,10 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include "config.h"
+
 #define MARGIN 2
+#define BLOCK_SIZE CELL_SIZE - MARGIN
 
 #include <QGraphicsRectItem>
 #include <QObject>

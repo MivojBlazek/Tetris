@@ -1,10 +1,12 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
-#include <QGraphicsItemGroup>
-#include <QList>
+#include "config.h"
 
 #include "block.h"
+
+#include <QGraphicsItemGroup>
+#include <QList>
 
 class Shape : public QGraphicsItemGroup
 {
@@ -17,15 +19,17 @@ public:
     QList<Block *> getBlocks() const;
     Shape::ShapeType getShapeType() const;
 
-    void moveDown(qreal step = 40.0);
-    void moveLeft(qreal step = 40.0);
-    void moveRight(qreal step = 40.0);
-    void moveUp(qreal step = 40.0);
+    void moveDown(qreal step = CELL_SIZE);
+    void moveLeft(qreal step = CELL_SIZE);
+    void moveRight(qreal step = CELL_SIZE);
+    void moveUp(qreal step = CELL_SIZE);
     void changeColor(QColor color);
     void rotate();
     void rotateBackwards();
 
 private:
+    void arrangeBlocks();
+
     QList<Block *> blocks;
     ShapeType mType;
 };

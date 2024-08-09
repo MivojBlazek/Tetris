@@ -1,8 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include "config.h"
+
 #include "scene.h"
+
+#include <QMainWindow>
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,5 +25,13 @@ private:
 
     void closeEvent(QCloseEvent *event) override;
     Scene *initScene();
+
+    QString score;
+
+    void increaseSpeed();
+    void checkHighscore();
+    void addScore(QString addToScore);
+    QString getHighscore();
+    void setHighscore(QString highscore);
 };
 #endif // MAINWINDOW_H

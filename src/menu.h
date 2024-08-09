@@ -1,6 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include "config.h"
+
 #include "shape.h"
 
 #include <QGraphicsScene>
@@ -22,7 +24,10 @@ private slots:
     void onStartButtonClicked();
 
 public slots:
+    void setFocusToStartButton();
     void setNextShape(Shape *shape);
+    void setScore(QString score);
+    void setHighscore(QString highscore);
 
 private:
     Ui::Menu *ui;

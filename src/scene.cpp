@@ -10,22 +10,25 @@
 Scene::Scene(QObject *parent)
     : QGraphicsScene{parent},
       isDropping{false},
-      holdDoneThisRound{false}
+      holdDoneThisRound{false},
+      preview{nullptr}
 {
     mTimer = new QTimer(this);
     connect(mTimer, &QTimer::timeout, this, &Scene::timeout);
 
     // Rows for detection full rows
-    for (int positionFromTop = 0; positionFromTop < 800; positionFromTop += 40)
+    for (int positionFromTop = 0; positionFromTop < 20 * CELL_SIZE; positionFromTop += CELL_SIZE)
     {
-        rows.append(new QGraphicsLineItem(0, positionFromTop + 20, 400, positionFromTop + 20));
+        rows.append(new QGraphicsLineItem(0, positionFromTop + CELL_SIZE / 2, 10 * CELL_SIZE, positionFromTop + CELL_SIZE / 2));
     }
 
     // Borders of graphics view
-    borders.append(new QGraphicsRectItem(0, 0, 0 - SIZE_OUT_OF_MAP, 800));        // Left
-    borders.append(new QGraphicsRectItem(0, 0, 400, 0 - SIZE_OUT_OF_MAP));        // Up
-    borders.append(new QGraphicsRectItem(0, 800, 400 + SIZE_OUT_OF_MAP, 800));    // Down
-    borders.append(new QGraphicsRectItem(400, 0, 400, 800 + SIZE_OUT_OF_MAP));    // Right
+    borders.append(new QGraphicsRectItem(0, 0, 0 - SIZE_OUT_OF_MAP, 20 * CELL_SIZE));                           // Left
+    borders.append(new QGraphicsRectItem(0, 0, 10 * CELL_SIZE, 0 - SIZE_OUT_OF_MAP));                           // Up
+    borders.append(new QGraphicsRectItem(0, 20 * CELL_SIZE, 10 * CELL_SIZE + SIZE_OUT_OF_MAP, 20 * CELL_SIZE)); // Down
+    borders.append(new QGraphicsRectItem(10 * CELL_SIZE, 0, 10 * CELL_SIZE, 20 * CELL_SIZE + SIZE_OUT_OF_MAP)); // Right
+
+    setupGrid();
 }
 
 void Scene::startButtonPressed()
@@ -36,10 +39,33 @@ void Scene::startButtonPressed()
     start();
 }
 
+void Scene::setupGrid()
+{
+    for (int positionFromTop = CELL_SIZE; positionFromTop < 20 * CELL_SIZE; positionFromTop += CELL_SIZE)
+    {
+        grid.append(new QGraphicsLineItem(0, positionFromTop, 10 * CELL_SIZE, positionFromTop));
+    }
+    for (int positionFromLeft = CELL_SIZE; positionFromLeft < 10 * CELL_SIZE; positionFromLeft += CELL_SIZE)
+    {
+        grid.append(new QGraphicsLineItem(positionFromLeft, 0, positionFromLeft, 20 * CELL_SIZE));
+    }
+    for (auto line : grid)
+    {
+        line->setPen(QPen(QColor(127, 127, 127, 100)));
+        this->addItem(line);
+    }
+}
+
 void Scene::start()
 {
     checkFullRows();
+    if (preview && preview != nullptr)
+    {
+        delete preview;
+    }
     mShape = new Shape(nextShape->getShapeType());
+    preview = new Shape(nextShape->getShapeType());
+    updatePreview();
     delete nextShape;
 
     nextShape = new Shape(nextType());
@@ -47,6 +73,7 @@ void Scene::start()
     holdDoneThisRound = false;
 
     this->addItem(mShape);
+    this->addItem(preview);
 
     mTimer->start(FALLING_SPEED);
     isDropping = true;
@@ -62,6 +89,11 @@ void Scene::stop()
         blocks.append(block);
     }
     isDropping = false;
+}
+
+void Scene::setSpeed(int speed)
+{
+    mTimer->start(speed);
 }
 
 void Scene::timeout()
@@ -81,13 +113,19 @@ void Scene::timeout()
         // If we lost game
         if (mShape->scenePos().y() <= 0.0)
         {
-            mShape->changeColor(Qt::red);
+            mShape->changeColor(Qt::gray);
             this->stop();
             return;
         }
 
         checkFullRows();
+        if (preview && preview != nullptr)
+        {
+            delete preview;
+        }
         mShape = new Shape(nextShape->getShapeType());
+        preview = new Shape(nextShape->getShapeType());
+        updatePreview();
         delete nextShape;
 
         nextShape = new Shape(nextType());
@@ -95,6 +133,7 @@ void Scene::timeout()
         holdDoneThisRound = false;
 
         this->addItem(mShape);
+        this->addItem(preview);
     }
 }
 
@@ -113,14 +152,26 @@ void Scene::keyPressEvent(QKeyEvent *event)
         {
             if (!isCollision(DOWN))
             {
+                addSomeScore(SOFT_DROP);
                 mShape->moveDown();
             }
+        }
+        else if (event->key() == Qt::Key_Space)
+        {
+            while (!isCollision(DOWN))
+            {
+                addSomeScore(HARD_DROP);
+                mShape->moveDown();
+            }
+            timeout();
         }
         else if (event->key() == Qt::Key_Left)
         {
             if (!isCollision(LEFT))
             {
                 mShape->moveLeft();
+                preview->moveLeft();
+                updatePreview();
             }
         }
         else if (event->key() == Qt::Key_Right)
@@ -128,11 +179,15 @@ void Scene::keyPressEvent(QKeyEvent *event)
             if (!isCollision(RIGHT))
             {
                 mShape->moveRight();
+                preview->moveRight();
+                updatePreview();
             }
         }
-        else if (event->key() == Qt::Key_Up)
+        else if (event->key() == Qt::Key_Up || event->key() == Qt::Key_X)
         {
             mShape->rotateBackwards();
+            preview->rotateBackwards();
+            updatePreview();
             checkCollisions(directionBorder, &numberOfBorderMoves, &directionBlock, &numberOfBlockMoves);
 
             // If we are stuck after rotation, put all moves back
@@ -141,6 +196,8 @@ void Scene::keyPressEvent(QKeyEvent *event)
         else if (event->key() == Qt::Key_Z)
         {
             mShape->rotate();
+            preview->rotate();
+            updatePreview();
             checkCollisions(directionBorder, &numberOfBorderMoves, &directionBlock, &numberOfBlockMoves);
 
             // If we are stuck after rotation, put all moves back
@@ -166,24 +223,32 @@ void Scene::keyPressEvent(QKeyEvent *event)
                 emit addedToHold(holdShape);
                 delete mShape;
                 mShape = nullptr;
+                delete preview;
+                preview = nullptr;
 
                 // Change actual shape on saved one from hold
                 if (tmpShape != nullptr)
                 {
                     mShape = new Shape(tmpShape->getShapeType());
+                    preview = new Shape(tmpShape->getShapeType());
+                    updatePreview();
                     delete tmpShape;
 
                     this->addItem(mShape);
+                    this->addItem(preview);
                 }
                 else
                 {
                     mShape = new Shape(nextShape->getShapeType());
+                    preview = new Shape(nextShape->getShapeType());
+                    updatePreview();
                     delete nextShape;
 
                     nextShape = new Shape(nextType());
                     emit nextShapeGenerated(nextShape);
 
                     this->addItem(mShape);
+                    this->addItem(preview);
                 }
             }
         }
@@ -191,6 +256,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         {
             QGraphicsScene::keyPressEvent(event);
         }
+        updatePreview();
     }
 }
 
@@ -416,6 +482,8 @@ Shape::ShapeType Scene::nextType()
 
 void Scene::checkFullRows()
 {
+    int numberOfRemovedRows = 0;
+
     QList<Block *> blocksToRemove;
     int blocksInRow;
     for (auto row : rows)
@@ -438,7 +506,28 @@ void Scene::checkFullRows()
             // Clear this row
             clearRow(blocksToRemove);
             shiftRowsDown(row->line().y1());
+
+            numberOfRemovedRows++;
         }
+    }
+
+    // How many rows were removed
+    switch (numberOfRemovedRows)
+    {
+        case 1:
+            addSomeScore(ONE_ROW);
+            break;
+        case 2:
+            addSomeScore(TWO_ROWS);
+            break;
+        case 3:
+            addSomeScore(THREE_ROWS);
+            break;
+        case 4:
+            addSomeScore(FOUR_ROWS);
+            break;
+        default:
+            break;
     }
 }
 
@@ -457,9 +546,69 @@ void Scene::shiftRowsDown(qreal deletedRowPosition)
     for (Block *block : blocks)
     {
         // Shift all blocks above deleted row
-        if (block->scenePos().y() < deletedRowPosition - 20.0)
+        if (block->scenePos().y() < deletedRowPosition - CELL_SIZE / 2)
         {
             block->moveDown();
         }
     }
+}
+
+void Scene::addSomeScore(ScoreType scoreToAdd)
+{
+    switch (scoreToAdd)
+    {
+        case SOFT_DROP:
+            emit addScore("1");
+            break;
+        case HARD_DROP:
+            emit addScore("2");
+            break;
+        case ONE_ROW:
+            emit addScore("100");
+            break;
+        case TWO_ROWS:
+            emit addScore("300");
+            break;
+        case THREE_ROWS:
+            emit addScore("500");
+            break;
+        case FOUR_ROWS:
+            emit addScore("800");
+            break;
+        default:
+            break;
+    }
+}
+
+void Scene::updatePreview()
+{
+    preview->setPos(mShape->pos().x(), 0.0);
+    preview->changeColor(QColor(127, 127, 127, 40));
+    while (!isPreviewDown())
+    {
+        preview->moveDown();
+    }
+}
+
+bool Scene::isPreviewDown()
+{
+    preview->moveDown(5);
+    for (Block *previewBlock : preview->getBlocks())
+    {
+        if (previewBlock->collidesWithItem(borders[2]))
+        {
+            preview->moveDown(-5);
+            return true;
+        }
+        for (Block *fallenBlock : blocks)
+        {
+            if (previewBlock->collidesWithItem(fallenBlock))
+            {
+                preview->moveDown(-5);
+                return true;
+            }
+        }
+    }
+    preview->moveDown(-5);
+    return false;
 }

@@ -1,0 +1,1 @@
+Build of this project compatible with Windows 10
