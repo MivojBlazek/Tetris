@@ -11,6 +11,10 @@ Menu::Menu(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->graphicsView->setScene(previewScene);
+    ui->graphicsView->setFixedSize(5 * CELL_SIZE + 2, 5 * CELL_SIZE + 2);
+
+    QGraphicsView *view = ui->graphicsView;
+    view->setStyleSheet("background-color: white; border: 1px solid black;");
 
     connect(ui->StartButton, &QPushButton::clicked, this, &Menu::onStartButtonClicked);
 

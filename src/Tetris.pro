@@ -31,6 +31,7 @@ SOURCES += \
 
 HEADERS += \
     block.h \
+    config.h \
     holdmenu.h \
     mainwindow.h \
     menu.h \

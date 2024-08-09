@@ -17,14 +17,20 @@ MainWindow::MainWindow(QWidget *parent)
       score{"0"}
 {
     ui->setupUi(this);
+    setStyleSheet("background-color: rgb(232, 232, 232);");
+
+    // Resize window to fit widgets size
+    resize(1, 1);
+
     ui->Right_menu->setFocusToStartButton();
     ui->Right_menu->setScore(score);
     ui->Right_menu->setHighscore(getHighscore());
 
-    resize(850, 850);
     Scene *scene = initScene();
 
     QGraphicsView *view = ui->graphicsView;
+    view->setStyleSheet("background-color: white; border: 1px solid black;");
+
     view->setScene(scene);
     view->setFocusPolicy(Qt::StrongFocus);
 
@@ -55,7 +61,8 @@ Scene *MainWindow::initScene()
     Scene *scene = new Scene(ui->graphicsView);
     ui->graphicsView->setScene(scene);
 
-    ui->graphicsView->setSceneRect(0, 0, 400, 800);
+    ui->graphicsView->setSceneRect(0, 0, 10 * CELL_SIZE, 20 * CELL_SIZE);
+    ui->graphicsView->setFixedSize(10 * CELL_SIZE + 2, 20 * CELL_SIZE + 2);
     ui->graphicsView->setRenderHint(QPainter::Antialiasing);
     ui->graphicsView->setResizeAnchor(QGraphicsView::NoAnchor);
     return scene;

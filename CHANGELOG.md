@@ -56,3 +56,9 @@ All notable changes to this project will be documented in this file.
 
 * Added hard drop feature with space on users keyboard
 * Added preview so user can know where does his piece fall
+
+## 09.08.2024
+
+* Added config.h file, where user can change some values like size of the playing window or speed of the game
+* Added colors to background (Windows set background color of main window and that graphics scenes to white and it flow together without borders)
+* Cleaned code a bit when there were magic numbers like size of cell

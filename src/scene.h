@@ -1,7 +1,8 @@
 ﻿#ifndef SCENE_H
 #define SCENE_H
 
-#define FALLING_SPEED 1000
+#include "config.h"
+
 #define SIZE_OUT_OF_MAP 10
 
 #include "shape.h"
