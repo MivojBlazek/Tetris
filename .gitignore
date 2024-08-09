@@ -82,3 +82,13 @@ build/Linux/.qmake*
 build/Linux/Makefile
 build/Linux/obj
 build/Linux/*.o
+
+!build/Windows/release/*
+!build/Windows/release/generic/*
+!build/Windows/release/iconengines/*
+!build/Windows/release/imageformats/*
+!build/Windows/release/networkinformation/*
+!build/Windows/release/platforms/*
+!build/Windows/release/styles/*
+!build/Windows/release/tls/*
+!build/Windows/release/translations/*
