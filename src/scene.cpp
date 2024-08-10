@@ -1,3 +1,11 @@
+#include "config.h"
+
+#ifdef AI
+#include "../../Tetris-AI/src/AI/gamestate.h"
+#include "../../Tetris-AI/src/AI/artificialintelligence.h"
+#include "../../Tetris-AI/src/AI/outcome.h"
+#endif
+
 #include "scene.h"
 #include "shape.h"
 
@@ -5,7 +13,6 @@
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QKeyEvent>
-#include <memory>
 
 Scene::Scene(QObject *parent)
     : QGraphicsScene{parent},
@@ -35,6 +42,7 @@ void Scene::startButtonPressed()
 {
     nextShape = new Shape(nextType());
     holdShape = nullptr;
+    mShape = nullptr;
     emit nextShapeGenerated(nextShape);
     start();
 }
@@ -205,7 +213,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         }
         else if (event->key() == Qt::Key_C)
         {
-            // User can use hold anly once per piece drop
+            // User can use hold only once per piece drop
             if (!holdDoneThisRound)
             {
                 holdDoneThisRound = true;
@@ -476,11 +484,11 @@ Scene::CollisionDirection Scene::isAlreadyBlockCollision()
 
 Shape::ShapeType Scene::nextType()
 {
-    int randomInt = QRandomGenerator::global()->bounded(0, 7);
+    int randomInt = QRandomGenerator::global()->bounded(1, 8);
     return static_cast<Shape::ShapeType>(randomInt);
 }
 
-void Scene::checkFullRows()
+int Scene::checkFullRows()
 {
     int numberOfRemovedRows = 0;
 
@@ -529,6 +537,7 @@ void Scene::checkFullRows()
         default:
             break;
     }
+    return numberOfRemovedRows;
 }
 
 void Scene::clearRow(QList<Block *> blocksToDelete)
@@ -612,3 +621,13 @@ bool Scene::isPreviewDown()
     preview->moveDown(-5);
     return false;
 }
+
+#ifdef AI
+void Scene::newState()
+{
+    GameState state(blocks, mShape, nextShape, holdShape);
+    ArtificialIntelligence *ai = new ArtificialIntelligence();
+    Outcome bestOutcome = ai->findBestOutcome(state);
+    ai->movePiece(bestOutcome);
+}
+#endif

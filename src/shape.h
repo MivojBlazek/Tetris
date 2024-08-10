@@ -11,7 +11,7 @@
 class Shape : public QGraphicsItemGroup
 {
 public:
-    enum ShapeType { I, O, T, S, Z, J, L };
+    enum ShapeType { NO_SHAPE, I, O, T, S, Z, J, L };
     enum CollisionDirection { NONE, DOWN, LEFT, RIGHT, UP };
 
     explicit Shape(ShapeType type, QGraphicsItem *parent = nullptr);

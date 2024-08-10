@@ -77,6 +77,8 @@ void Shape::arrangeBlocks()
             blocks[3]->setPos(0, 0);
             changeColor(QColor(255, 127, 0)); // Orange
             break;
+        default:
+            break;
     }
 }
 

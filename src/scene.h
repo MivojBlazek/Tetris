@@ -23,20 +23,22 @@ public:
     void stop();
     void setSpeed(int speed);
 
+    void newState();
+
 signals:
     void nextShapeGenerated(Shape *nextShape);
     void addedToHold(Shape *holdShape);
     void addScore(QString score);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void setupGrid();
 
     void timeout();
     Shape::ShapeType nextType();
-    void checkFullRows();
+    int checkFullRows();
     void clearRow(QList<Block *> blocks);
     void shiftRowsDown(qreal deletedRowPosition);
 
