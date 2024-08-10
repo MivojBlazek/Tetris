@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(scene, &Scene::nextShapeGenerated, ui->Right_menu, &Menu::setNextShape);
+    connect(scene, &Scene::nextShapeGenerated, scene, &Scene::newState);
     connect(scene, &Scene::addedToHold, ui->Left_menu, &HoldMenu::setHold);
 
     connect(scene, &Scene::addScore, this, &MainWindow::addScore);
