@@ -1,9 +1,9 @@
 #include "config.h"
 
 #ifdef AI
-#include "../../Tetris-AI/src/AI/gamestate.h"
-#include "../../Tetris-AI/src/AI/artificialintelligence.h"
-#include "../../Tetris-AI/src/AI/outcome.h"
+#include "../../Tetris-AI/src/gamestate.h"
+#include "../../Tetris-AI/src/artificialintelligence.h"
+#include "../../Tetris-AI/src/outcome.h"
 #endif
 
 #include "scene.h"
