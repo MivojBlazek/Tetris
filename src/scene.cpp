@@ -31,7 +31,6 @@ Scene::Scene(QObject *parent)
 
     // Borders of graphics view
     borders.append(new QGraphicsRectItem(0, 0, 0 - SIZE_OUT_OF_MAP, 20 * CELL_SIZE));                           // Left
-    borders.append(new QGraphicsRectItem(0, 0, 10 * CELL_SIZE, 0 - SIZE_OUT_OF_MAP));                           // Up
     borders.append(new QGraphicsRectItem(0, 20 * CELL_SIZE, 10 * CELL_SIZE + SIZE_OUT_OF_MAP, 20 * CELL_SIZE)); // Down
     borders.append(new QGraphicsRectItem(10 * CELL_SIZE, 0, 10 * CELL_SIZE, 20 * CELL_SIZE + SIZE_OUT_OF_MAP)); // Right
 
@@ -66,7 +65,7 @@ void Scene::setupGrid()
 
 void Scene::start()
 {
-    checkFullRows();
+    checkFullRows(blocks);
     if (preview && preview != nullptr)
     {
         delete preview;
@@ -106,7 +105,7 @@ void Scene::setSpeed(int speed)
 
 void Scene::timeout()
 {
-    if (!isCollision(DOWN))
+    if (!isCollision(DOWN, mShape, blocks))
     {
         mShape->moveDown();
     }
@@ -126,7 +125,7 @@ void Scene::timeout()
             return;
         }
 
-        checkFullRows();
+        checkFullRows(blocks);
         if (preview && preview != nullptr)
         {
             delete preview;
@@ -158,7 +157,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
 
         if (event->key() == Qt::Key_Down)
         {
-            if (!isCollision(DOWN))
+            if (!isCollision(DOWN, mShape, blocks))
             {
                 addSomeScore(SOFT_DROP);
                 mShape->moveDown();
@@ -166,7 +165,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         }
         else if (event->key() == Qt::Key_Space)
         {
-            while (!isCollision(DOWN))
+            while (!isCollision(DOWN, mShape, blocks))
             {
                 addSomeScore(HARD_DROP);
                 mShape->moveDown();
@@ -175,7 +174,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         }
         else if (event->key() == Qt::Key_Left)
         {
-            if (!isCollision(LEFT))
+            if (!isCollision(LEFT, mShape, blocks))
             {
                 mShape->moveLeft();
                 preview->moveLeft();
@@ -184,7 +183,7 @@ void Scene::keyPressEvent(QKeyEvent *event)
         }
         else if (event->key() == Qt::Key_Right)
         {
-            if (!isCollision(RIGHT))
+            if (!isCollision(RIGHT, mShape, blocks))
             {
                 mShape->moveRight();
                 preview->moveRight();
@@ -373,52 +372,52 @@ void Scene::putRotationBack(CollisionDirection directionBorder[], int numberOfBo
     }
 }
 
-bool Scene::isCollision(int direction)
+bool Scene::isCollision(int direction, Shape *shape, QList<Block *> allBLocks)
 {
-    smallMoveToCollisionDetection(direction, 5.0);
+    smallMoveToCollisionDetection(direction, shape, 5.0);
 
     // Check collisions with borders
     for (auto border : borders)
     {
-        for (Block *block : mShape->getBlocks())
+        for (Block *block : shape->getBlocks())
         {
             if (block->collidesWithItem(border))
             {
-                smallMoveToCollisionDetection(direction, -5.0);
+                smallMoveToCollisionDetection(direction, shape, -5.0);
                 return true;
             }
         }
     }
 
     // Check collisions with other blocks
-    for (Block *block : mShape->getBlocks())
+    for (Block *block : shape->getBlocks())
     {
-        for (Block *otherBlock : blocks)
+        for (Block *otherBlock : allBLocks)
         {
             if (block->collidesWithItem(otherBlock))
             {
-                smallMoveToCollisionDetection(direction, -5.0);
+                smallMoveToCollisionDetection(direction, shape, -5.0);
                 return true;
             }
         }
     }
 
-    smallMoveToCollisionDetection(direction, -5.0);
+    smallMoveToCollisionDetection(direction, shape, -5.0);
     return false;
 }
 
-void Scene::smallMoveToCollisionDetection(int direction, qreal step)
+void Scene::smallMoveToCollisionDetection(int direction, Shape *shape, qreal step)
 {
     switch (direction)
     {
         case DOWN:
-            mShape->moveDown(step);
+            shape->moveDown(step);
             break;
         case LEFT:
-            mShape->moveLeft(step);
+            shape->moveLeft(step);
             break;
         case RIGHT:
-            mShape->moveRight(step);
+            shape->moveRight(step);
             break;
         default:
             break;
@@ -435,9 +434,8 @@ Scene::CollisionDirection Scene::isAlreadyBorderCollision()
             if (block->collidesWithItem(border))
             {
                 if (border == borders[0]) return LEFT;
-                if (border == borders[1]) return UP;
-                if (border == borders[2]) return DOWN;
-                if (border == borders[3]) return RIGHT;
+                if (border == borders[1]) return DOWN;
+                if (border == borders[2]) return RIGHT;
             }
         }
     }
@@ -488,7 +486,7 @@ Shape::ShapeType Scene::nextType()
     return static_cast<Shape::ShapeType>(randomInt);
 }
 
-int Scene::checkFullRows()
+int Scene::checkFullRows(QList<Block *> allBlocks)
 {
     int numberOfRemovedRows = 0;
 
@@ -499,7 +497,7 @@ int Scene::checkFullRows()
         blocksToRemove.clear();
         blocksInRow = 0;
 
-        for (Block *block : blocks)
+        for (Block *block : allBlocks)
         {
             if (row->collidesWithItem(block))
             {
@@ -604,7 +602,7 @@ bool Scene::isPreviewDown()
     preview->moveDown(5);
     for (Block *previewBlock : preview->getBlocks())
     {
-        if (previewBlock->collidesWithItem(borders[2]))
+        if (previewBlock->collidesWithItem(borders[1]))
         {
             preview->moveDown(-5);
             return true;
@@ -626,8 +624,8 @@ bool Scene::isPreviewDown()
 void Scene::newState()
 {
     GameState state(blocks, mShape, nextShape, holdShape);
-    ArtificialIntelligence *ai = new ArtificialIntelligence();
+    ArtificialIntelligence *ai = new ArtificialIntelligence(this);
     Outcome bestOutcome = ai->findBestOutcome(state);
-    ai->movePiece(bestOutcome);
+    ai->movePiece(bestOutcome, mShape);
 }
 #endif
