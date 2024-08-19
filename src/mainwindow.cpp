@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "scene.h"
@@ -40,7 +42,11 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(scene, &Scene::nextShapeGenerated, ui->Right_menu, &Menu::setNextShape);
+
+    #ifdef AI
     connect(scene, &Scene::nextShapeGenerated, scene, &Scene::newState);
+    #endif
+
     connect(scene, &Scene::addedToHold, ui->Left_menu, &HoldMenu::setHold);
 
     connect(scene, &Scene::addScore, this, &MainWindow::addScore);

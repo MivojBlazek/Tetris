@@ -25,7 +25,7 @@ public:
 
     void newState();
     bool isCollision(int direction, Shape *shape, QList<Block *> allBlocks);
-    int checkFullRows(QList<Block *> allBlocks);
+    QList<QGraphicsLineItem *> getRows();
 
 signals:
     void nextShapeGenerated(Shape *nextShape);
@@ -57,6 +57,7 @@ private:
     Scene::CollisionDirection isAlreadyBorderCollision();
     Scene::CollisionDirection isAlreadyBlockCollision();
 
+    int checkFullRows();
     void addSomeScore(Scene::ScoreType scoreToAdd);
 
     void updatePreview();
