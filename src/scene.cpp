@@ -65,7 +65,7 @@ void Scene::setupGrid()
 
 void Scene::start()
 {
-    checkFullRows(blocks);
+    checkFullRows();
     if (preview && preview != nullptr)
     {
         delete preview;
@@ -125,7 +125,7 @@ void Scene::timeout()
             return;
         }
 
-        checkFullRows(blocks);
+        checkFullRows();
         if (preview && preview != nullptr)
         {
             delete preview;
@@ -486,7 +486,7 @@ Shape::ShapeType Scene::nextType()
     return static_cast<Shape::ShapeType>(randomInt);
 }
 
-int Scene::checkFullRows(QList<Block *> allBlocks)
+int Scene::checkFullRows()
 {
     int numberOfRemovedRows = 0;
 
@@ -497,7 +497,7 @@ int Scene::checkFullRows(QList<Block *> allBlocks)
         blocksToRemove.clear();
         blocksInRow = 0;
 
-        for (Block *block : allBlocks)
+        for (Block *block : blocks)
         {
             if (row->collidesWithItem(block))
             {
@@ -620,12 +620,36 @@ bool Scene::isPreviewDown()
     return false;
 }
 
+QList<QGraphicsLineItem *> Scene::getRows()
+{
+    return rows;
+}
+
 #ifdef AI
 void Scene::newState()
 {
     GameState state(blocks, mShape, nextShape, holdShape);
     ArtificialIntelligence *ai = new ArtificialIntelligence(this);
     Outcome bestOutcome = ai->findBestOutcome(state);
-    ai->movePiece(bestOutcome, mShape);
+    ai->movePiece(bestOutcome, mShape, preview);
+
+    if (preview && preview != nullptr)
+    {
+        updatePreview();
+    }
+
+    if (mShape && mShape != nullptr)
+    {
+        QTimer::singleShot(200, this, [=]()
+        {
+            // Perform hard drop
+            while (!isCollision(DOWN, mShape, blocks))
+            {
+                addSomeScore(HARD_DROP);
+                mShape->moveDown();
+            }
+            timeout();
+        });
+    }
 }
 #endif
