@@ -628,9 +628,54 @@ QList<QGraphicsLineItem *> Scene::getRows()
 #ifdef AI
 void Scene::newState()
 {
-    GameState state(blocks, mShape, nextShape, holdShape);
+    GameState state(blocks, mShape, nextShape, holdShape, holdDoneThisRound);
     ArtificialIntelligence *ai = new ArtificialIntelligence(this);
     Outcome bestOutcome = ai->findBestOutcome(state);
+    if (bestOutcome.left(2) == "Ho")
+    {
+        bestOutcome.remove(0, 2);
+
+        // Perform swap of falling and holding pieces
+        if (!holdDoneThisRound)
+        {
+            holdDoneThisRound = true;
+
+            Shape *tmpShape = nullptr;
+            if (holdShape != nullptr)
+            {
+                // Take shape from hold
+                tmpShape = new Shape(holdShape->getShapeType());
+                delete holdShape;
+                holdShape = nullptr;
+            }
+            // Add to hold
+            holdShape = new Shape(mShape->getShapeType());
+            emit addedToHold(holdShape);
+            delete mShape;
+            mShape = nullptr;
+            delete preview;
+            preview = nullptr;
+
+            // Change actual shape on saved one from hold
+            if (tmpShape != nullptr)
+            {
+                mShape = new Shape(tmpShape->getShapeType());
+                preview = new Shape(tmpShape->getShapeType());
+                updatePreview();
+                delete tmpShape;
+            }
+            else
+            {
+                mShape = new Shape(nextShape->getShapeType());
+                preview = new Shape(nextShape->getShapeType());
+                updatePreview();
+                delete nextShape;
+
+                nextShape = new Shape(nextType());
+                emit nextShapeGenerated(nextShape);
+            }
+        }
+    }
     ai->movePiece(bestOutcome, mShape, preview);
 
     if (preview && preview != nullptr)
