@@ -24,6 +24,8 @@ public:
     void setSpeed(int speed);
 
     void newState();
+    bool isCollision(int direction, Shape *shape, QList<Block *> allBlocks);
+    QList<QGraphicsLineItem *> getRows();
 
 signals:
     void nextShapeGenerated(Shape *nextShape);
@@ -38,7 +40,6 @@ private:
 
     void timeout();
     Shape::ShapeType nextType();
-    int checkFullRows();
     void clearRow(QList<Block *> blocks);
     void shiftRowsDown(qreal deletedRowPosition);
 
@@ -52,11 +53,11 @@ private:
     bool isDropping;
     bool holdDoneThisRound;
 
-    bool isCollision(int direction = DOWN);
-    void smallMoveToCollisionDetection(int direction, qreal step);
+    void smallMoveToCollisionDetection(int direction, Shape *shape, qreal step);
     Scene::CollisionDirection isAlreadyBorderCollision();
     Scene::CollisionDirection isAlreadyBlockCollision();
 
+    int checkFullRows();
     void addSomeScore(Scene::ScoreType scoreToAdd);
 
     void updatePreview();
